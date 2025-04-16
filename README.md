@@ -10,13 +10,14 @@ Bu projeyi keyfime göre 25 Yıl + AI + 30 dakikada geliştirdim.
   - **Bugüne Özel Görevler**: Sadece bugün için geçerli olan geçici görevler
 
 - **Bildirim Sistemi**: 
-  - TODOlar için zamanlanmış hatırlatmalar
-  - TODO başlama saatinden 5 dakika önce otomatik bildirim
+  - Görevler için zamanlanmış hatırlatmalar
+  - Görev başlama saatinden 5 dakika önce otomatik bildirim
 
 - **Kullanıcı Dostu Arayüz**:
   - Kolay görev ekleme ve düzenleme
   - Kategorilere göre ayrılmış görev listeleri
   - Material Design 3 ile modern ve koyu tema
+  - Sezgisel gezinme ve akıcı animasyonlar
 
 ## Teknik Detaylar
 
@@ -24,11 +25,18 @@ Bu projeyi keyfime göre 25 Yıl + AI + 30 dakikada geliştirdim.
 - SQLite veritabanı ile yerel veri saklama
 - Provider kullanılarak durum yönetimi
 - Flutter Local Notifications ile bildirim sistemi
+- CSV dışa/içe aktarma desteği
+- Gerçek zamanlı veri senkronizasyonu
 
 ## Ekran Görüntüleri
 
-![SS](./screen_shots/ss_1.png)
+![Ana Ekran](./screen_shots/ss_1.png)
 
----
+## Gelecek Özellikler
 
-Geliştirici: Berk
+- Bildirim Ayarları
+- Bulut senkronizasyon
+- İstatistikler ve raporlama
+- Kategori filtreleme
+- Widget desteği
+- Tema özelleştirme
