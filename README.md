@@ -27,7 +27,7 @@ Bu projeyi keyfime göre 25 Yıl + AI + 30 dakikada geliştirdim.
 
 ## Ekran Görüntüleri
 
-[Buraya uygulama ekran görüntüleri eklenebilir]
+![SS](./screen_shots/ss_1.png)
 
 ---
 
