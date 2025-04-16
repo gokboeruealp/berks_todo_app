@@ -1,4 +1,4 @@
-package com.example.berks_todo_app
+package tr.homing_pigeon_games.berks_todo_app
 
 import io.flutter.embedding.android.FlutterActivity
 
