@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
@@ -19,7 +20,7 @@ class NotificationService {
     tz_data.initializeTimeZones();
     
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@drawable/notification_icon');
     
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
@@ -189,6 +190,8 @@ class NotificationService {
             'Todo Hatırlatıcı',
             importance: Importance.high,
             priority: Priority.high,
+            icon: 'notification_icon',
+            color: Color.fromARGB(255, 148, 192, 213),
           ),
           iOS: DarwinNotificationDetails(
             presentAlert: true,
