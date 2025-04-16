@@ -1,7 +1,7 @@
 name: berks_todo_app
 description: "Kendi Keyfime Göre Todo Uygulamam"
 
-version: 1.1.0+1
+version: 1.1.1+1
 
 environment:
   sdk: '>=3.2.3 <4.0.0'

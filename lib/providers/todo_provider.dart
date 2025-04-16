@@ -30,13 +30,29 @@ class TodoProvider with ChangeNotifier {
     
     // Load all weekly todos
     final allTodos = await _dbHelper.getTodos();
+
+    allTodos.sort((a, b) {
+      if (a.time == null || b.time == null) return 0;
+      return DateFormat.Hm().parse(a.time!).compareTo(DateFormat.Hm().parse(b.time!));
+    });
+
     _weeklyTodos = allTodos.where((todo) => todo.type == TodoType.weekly).toList();
     
     // Load today's specific todos
     _todaySpecificTodos = await _dbHelper.getTodaySpecificTodos();
+
+    _todaySpecificTodos.sort((a, b) {
+      if (a.time == null || b.time == null) return 0;
+      return DateFormat.Hm().parse(a.time!).compareTo(DateFormat.Hm().parse(b.time!));
+    });
     
     // Load all of today's todos (daily + weekly for today + today specific)
     _todayTodos = await _dbHelper.getAllTodosForToday();
+
+    _todayTodos.sort((a, b) {
+      if (a.time == null || b.time == null) return 0;
+      return DateFormat.Hm().parse(a.time!).compareTo(DateFormat.Hm().parse(b.time!));
+    });
     
     // Plan all notifications for non-completed todos
     _scheduleAllNotifications();
