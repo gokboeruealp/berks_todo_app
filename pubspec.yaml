@@ -1,9 +1,11 @@
 name: berks_todo_app
 description: "Kendi Keyfime Göre Todo Uygulamam"
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.6.0
+  sdk: '>=3.2.3 <4.0.0'
 
 dependencies:
   flutter:
@@ -23,6 +25,27 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.13
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/homing-pigeon-logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/homing-pigeon-logo.png"
+
+flutter_native_splash:
+  color: "#000000"
+  image: assets/homing-pigeon-logo.png
+  android_12:
+    image: assets/homing-pigeon-logo.png
+    icon_background_color: "#000000"
+  ios: true
+  web: false
   
 flutter:
   uses-material-design: true
+  assets:
+    - assets/homing-pigeon-logo.png
