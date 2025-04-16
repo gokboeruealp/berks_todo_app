@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/todo.dart';
 import '../providers/todo_provider.dart';
 import '../widgets/todo_item.dart';
+import '../widgets/time_picker_widget.dart';
 
 class TodaySpecificTodosScreen extends StatelessWidget {
   const TodaySpecificTodosScreen({super.key});
@@ -115,6 +116,7 @@ class TodaySpecificTodosScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextField(
+                  readOnly: true,
                   controller: timeController,
                   decoration: InputDecoration(
                     labelText: 'Saat (Ör: 14:30)',
@@ -127,23 +129,13 @@ class TodaySpecificTodosScreen extends StatelessWidget {
                     // Hide keyboard
                     FocusScope.of(context).requestFocus(FocusNode());
                     
-                    final TimeOfDay? picked = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.now(),
-                      builder: (context, child) {
-                        return Theme(
-                          data: Theme.of(context).copyWith(
-                            timePickerTheme: TimePickerTheme.of(context).copyWith(
-                              backgroundColor: theme.colorScheme.surface,
-                            ),
-                          ),
-                          child: child!,
-                        );
-                      }
+                    final String? pickedTime = await showCustomTimePicker(
+                      context,
+                      initialTime: timeController.text,
                     );
                     
-                    if (picked != null) {
-                      timeController.text = '${picked.hour}:${picked.minute.toString().padLeft(2, '0')}';
+                    if (pickedTime != null) {
+                      timeController.text = pickedTime;
                     }
                   },
                 ),
@@ -217,6 +209,7 @@ class TodaySpecificTodosScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextField(
+                  readOnly: true,
                   controller: timeController,
                   decoration: InputDecoration(
                     labelText: 'Saat (Ör: 14:30)',
@@ -229,23 +222,13 @@ class TodaySpecificTodosScreen extends StatelessWidget {
                     // Hide keyboard
                     FocusScope.of(context).requestFocus(FocusNode());
                     
-                    final TimeOfDay? picked = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.now(),
-                      builder: (context, child) {
-                        return Theme(
-                          data: Theme.of(context).copyWith(
-                            timePickerTheme: TimePickerTheme.of(context).copyWith(
-                              backgroundColor: theme.colorScheme.surface,
-                            ),
-                          ),
-                          child: child!,
-                        );
-                      }
+                    final String? pickedTime = await showCustomTimePicker(
+                      context,
+                      initialTime: timeController.text,
                     );
                     
-                    if (picked != null) {
-                      timeController.text = '${picked.hour}:${picked.minute.toString().padLeft(2, '0')}';
+                    if (pickedTime != null) {
+                      timeController.text = pickedTime;
                     }
                   },
                 ),
