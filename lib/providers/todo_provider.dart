@@ -3,6 +3,7 @@ import '../models/todo.dart';
 import '../helpers/database_helper.dart';
 import 'package:intl/intl.dart';
 import '../services/notification_service.dart';
+import '../services/csv_service.dart';
 
 class TodoProvider with ChangeNotifier {
   List<Todo> _dailyTodos = [];
@@ -12,6 +13,7 @@ class TodoProvider with ChangeNotifier {
   
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final NotificationService _notificationService = NotificationService();
+  final CsvService _csvService = CsvService();
   
   List<Todo> get dailyTodos => _dailyTodos;
   List<Todo> get weeklyTodos => _weeklyTodos;
@@ -164,5 +166,48 @@ class TodoProvider with ChangeNotifier {
       'cumartesi',
       'pazar'
     ];
+  }
+
+  // Export all todos to a CSV file with file picker
+  Future<String?> exportToCsv({String defaultFileName = 'todos.csv'}) async {
+    // Get all todos
+    final List<Todo> allTodos = await _dbHelper.getTodos();
+    // Export to CSV with file picker
+    return _csvService.exportToCsvFile(allTodos, defaultFileName: defaultFileName);
+  }
+  
+  // Import todos from a CSV file with enhanced file picker
+  Future<int> importFromCsv() async {
+    try {
+      // Import todos from CSV with enhanced file picker
+      final List<Todo> importedTodos = await _csvService.importFromCsvFile();
+      
+      // If we have imported todos
+      if (importedTodos.isNotEmpty) {
+        int importedCount = 0;
+        
+        // Add each todo to the database
+        for (var todo in importedTodos) {
+          // Create a new todo without the id to avoid conflicts
+          final newTodo = Todo(
+            title: todo.title,
+            description: todo.description,
+            time: todo.time,
+            weekday: todo.weekday,
+            isDone: todo.isDone,
+            type: todo.type,
+          );
+          
+          await addTodo(newTodo);
+          importedCount++;
+        }
+        
+        return importedCount;
+      }
+    } catch (e) {
+      debugPrint('Todo içe aktarma hatası: $e');
+      rethrow;
+    }
+    return 0;
   }
 }

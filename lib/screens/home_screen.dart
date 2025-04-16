@@ -16,7 +16,15 @@ class HomeScreen extends StatelessWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bugün')
+        title: const Text('Bugün'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              _showSettingsDialog(context, todoProvider);
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -75,6 +83,263 @@ class HomeScreen extends StatelessWidget {
         child: const Icon(Icons.add, color: Colors.black),
       ),
     );
+  }
+
+  void _showSettingsDialog(BuildContext context, TodoProvider todoProvider) {
+    final theme = Theme.of(context);
+    
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Ayarlar'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.file_download),
+              title: const Text('CSV olarak dışa aktar'),
+              onTap: () async {
+                Navigator.pop(dialogContext);
+                await _showExportDialog(context, todoProvider);
+              },
+            ),
+            Divider(color: theme.dividerColor),
+            ListTile(
+              leading: const Icon(Icons.file_upload),
+              title: const Text('CSV\'den içe aktar'),
+              onTap: () async {
+                Navigator.pop(dialogContext);
+                await _importFromCsv(context, todoProvider);
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Kapat',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Yeni metot: CSV dışa aktarma için dosya adı soracak dialog
+  Future<void> _showExportDialog(BuildContext context, TodoProvider todoProvider) async {
+    final TextEditingController fileNameController = TextEditingController(text: 'todos.csv');
+    final theme = Theme.of(context);
+    
+    // Show dialog to get file name
+    final bool? shouldExport = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('CSV Olarak Dışa Aktar'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Dışa aktarılacak dosya adını belirtin:',
+              style: theme.textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: fileNameController,
+              decoration: InputDecoration(
+                labelText: 'Dosya Adı',
+                hintText: 'todos.csv',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                prefixIcon: const Icon(Icons.description),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Not: Önce bir klasör seçmeniz istenecek, ardından bu dosya adı ile CSV dosyanız oluşturulacaktır.',
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(
+              'İptal',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Dosya Adını Onayla'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldExport == true) {
+      // Ensure the file name is not empty and has .csv extension
+      String fileName = fileNameController.text.trim();
+      
+      if (fileName.isEmpty) {
+        fileName = 'todos.csv';
+      } else if (!fileName.toLowerCase().endsWith('.csv')) {
+        fileName = '$fileName.csv';
+      }
+      
+      await _exportToCsv(context, todoProvider, fileName);
+    }
+  }
+
+  Future<void> _exportToCsv(
+    BuildContext context, 
+    TodoProvider todoProvider, 
+    [String fileName = 'todos.csv']
+  ) async {
+    // Store a reference to the scaffold messenger
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
+    try {
+      final filePath = await todoProvider.exportToCsv(defaultFileName: fileName);
+      
+      if (filePath != null) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text('CSV dosyası başarıyla dışa aktarıldı:\n$filePath'),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Tamam',
+              onPressed: () {},
+            ),
+          ),
+        );
+      } else {
+        // Kullanıcı dosya veya klasör seçimini iptal etmiş olabilir
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text('Dışa aktarma iptal edildi'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      _showErrorDialog(context, 'Dışa aktarma hatası: $e');
+    }
+  }
+
+  Future<void> _importFromCsv(BuildContext context, TodoProvider todoProvider) async {
+    // Store a reference to the scaffold messenger
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    BuildContext? loadingDialogContext;
+    
+    try {
+      // Show confirmation dialog
+      final bool? confirm = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('CSV\'den İçe Aktar'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'CSV dosyasından görevleri içe aktarmak istiyor musunuz?\n',
+              ),
+              const Text(
+                'Dosya seçim penceresi açılacak ve bir CSV dosyası seçmeniz gerekecektir.',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Not: İçe aktarılan görevler mevcut görevlere eklenecektir.',
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('İçe Aktar'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm == true) {
+        // Show loading indicator (will be shown after file selection)
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) {
+            loadingDialogContext = dialogContext;
+            return const AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('CSV dosyasından içe aktarılıyor...'),
+                ],
+              ),
+            );
+          },
+        );
+
+        final importedCount = await todoProvider.importFromCsv();
+        
+        // Close loading dialog if it's still showing and context is valid
+        if (loadingDialogContext != null && Navigator.of(context, rootNavigator: true).canPop()) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+        
+        if (importedCount > 0) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('$importedCount görev başarıyla içe aktarıldı'),
+              action: SnackBarAction(
+                label: 'Tamam',
+                onPressed: () {},
+              ),
+            ),
+          );
+        } else {
+          scaffoldMessenger.showSnackBar(
+            const SnackBar(
+              content: Text('İçe aktarılan görev bulunamadı veya işlem iptal edildi'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Close loading dialog if it's still showing and context is valid
+      if (loadingDialogContext != null && Navigator.of(context, rootNavigator: true).canPop()) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      _showErrorDialog(context, 'İçe aktarma hatası: $e');
+    }
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    // Use a check to ensure the context is valid before showing the dialog
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Hata'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Tamam'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _addTodoDialog(BuildContext context, TodoType type) {
