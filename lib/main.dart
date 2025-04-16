@@ -6,8 +6,15 @@ import 'screens/home_screen.dart';
 import 'screens/daily_todos_screen.dart';
 import 'screens/weekly_todos_screen.dart';
 import 'screens/today_specific_todos_screen.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Bildirim servisini başlat
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+  
   runApp(const BerksTodoApp());
 }
 

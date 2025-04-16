@@ -1,16 +1,34 @@
-# berks_todo_app
+# Keyfimin Kahyası + AI
 
-A new Flutter project.
+Bu projeyi keyfime göre 25 Yıl + AI + 30 dakikada geliştirdim.
 
-## Getting Started
+## Özellikler
 
-This project is a starting point for a Flutter application.
+- **Farklı Todo Tipleri**:
+  - **Günlük Görevler**: Her gün tekrarlanan rutin işler
+  - **Haftalık Görevler**: Haftanın belirli günlerinde yapılması gereken işler
+  - **Bugüne Özel Görevler**: Sadece bugün için geçerli olan geçici görevler
 
-A few resources to get you started if this is your first Flutter project:
+- **Bildirim Sistemi**: 
+  - TODOlar için zamanlanmış hatırlatmalar
+  - TODO başlama saatinden 5 dakika önce otomatik bildirim
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Kullanıcı Dostu Arayüz**:
+  - Kolay görev ekleme ve düzenleme
+  - Kategorilere göre ayrılmış görev listeleri
+  - Material Design 3 ile modern ve koyu tema
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Teknik Detaylar
+
+- Flutter ile geliştirilmiş çapraz platform uygulama
+- SQLite veritabanı ile yerel veri saklama
+- Provider kullanılarak durum yönetimi
+- Flutter Local Notifications ile bildirim sistemi
+
+## Ekran Görüntüleri
+
+[Buraya uygulama ekran görüntüleri eklenebilir]
+
+---
+
+Geliştirici: Berk

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/todo.dart';
 import '../helpers/database_helper.dart';
 import 'package:intl/intl.dart';
+import '../services/notification_service.dart';
 
 class TodoProvider with ChangeNotifier {
   List<Todo> _dailyTodos = [];
@@ -10,6 +11,7 @@ class TodoProvider with ChangeNotifier {
   List<Todo> _todaySpecificTodos = [];
   
   final DatabaseHelper _dbHelper = DatabaseHelper();
+  final NotificationService _notificationService = NotificationService();
   
   List<Todo> get dailyTodos => _dailyTodos;
   List<Todo> get weeklyTodos => _weeklyTodos;
@@ -34,23 +36,77 @@ class TodoProvider with ChangeNotifier {
     // Load all of today's todos (daily + weekly for today + today specific)
     _todayTodos = await _dbHelper.getAllTodosForToday();
     
+    // Plan all notifications for non-completed todos
+    _scheduleAllNotifications();
+    
     notifyListeners();
+  }
+  
+  // Schedule notifications for all active todos
+  Future<void> _scheduleAllNotifications() async {
+    // Cancel all existing notifications first
+    await _notificationService.cancelAllNotifications();
+    
+    // Schedule notifications for daily todos
+    for (var todo in _dailyTodos) {
+      if (!todo.isDone && todo.time != null) {
+        await _notificationService.scheduleTodoNotification(todo);
+      }
+    }
+    
+    // Schedule notifications for weekly todos
+    for (var todo in _weeklyTodos) {
+      if (!todo.isDone && todo.time != null) {
+        await _notificationService.scheduleTodoNotification(todo);
+      }
+    }
+    
+    // Schedule notifications for today specific todos
+    for (var todo in _todaySpecificTodos) {
+      if (!todo.isDone && todo.time != null) {
+        await _notificationService.scheduleTodoNotification(todo);
+      }
+    }
   }
   
   // Add a new todo
   Future<void> addTodo(Todo todo) async {
     await _dbHelper.insertTodo(todo);
+    
+    // Schedule notification for the new todo (if not completed and has a time)
+    if (!todo.isDone && todo.time != null) {
+      // Check permission before scheduling
+      await _notificationService.checkAndRequestExactAlarmPermissionIfNeeded();
+      await _notificationService.scheduleTodoNotification(todo);
+    }
+    
     await _loadTodos();
   }
   
   // Update a todo
   Future<void> updateTodo(Todo todo) async {
     await _dbHelper.updateTodo(todo);
+    
+    // First cancel old notification
+    if (todo.id != null) {
+      await _notificationService.cancelNotification(todo.id!);
+    }
+    
+    // If todo is not completed and has a time, schedule a new notification
+    if (!todo.isDone && todo.time != null) {
+      // Check permission before scheduling
+      await _notificationService.checkAndRequestExactAlarmPermissionIfNeeded();
+      await _notificationService.scheduleTodoNotification(todo);
+    }
+    
     await _loadTodos();
   }
   
   // Delete a todo
   Future<void> deleteTodo(int id) async {
+    // Bildirimi iptal et
+    await _notificationService.cancelNotification(id);
+    
     await _dbHelper.deleteTodo(id);
     await _loadTodos();
   }
@@ -58,6 +114,18 @@ class TodoProvider with ChangeNotifier {
   // Toggle todo completion status
   Future<void> toggleTodoStatus(Todo todo) async {
     await _dbHelper.toggleTodoStatus(todo.id!, !todo.isDone);
+    
+    // Todo tamamlandıysa bildirimi iptal et, tamamlanmadıysa ve zamanı varsa yeniden planla
+    if (todo.id != null) {
+      if (!todo.isDone) { // Şimdi tamamlanacak
+        await _notificationService.cancelNotification(todo.id!);
+      } else if (todo.time != null) { // Tamamlama işlemi geri alındıysa
+        await _notificationService.scheduleTodoNotification(
+          todo.copyWith(isDone: false)
+        );
+      }
+    }
+    
     await _loadTodos();
   }
   
